@@ -1,0 +1,4 @@
+
+For more information on bankjob, see http://bankjob.rubyforge.org
+
+
