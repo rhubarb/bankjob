@@ -4,7 +4,9 @@
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Bankjob is a command line ruby program for scraping online banking sites and producing statements
+as local files in OFX (Open Fincancial Exchange) or CSV (Comma Separated Values) formats.:w
+
 
 == FEATURES/PROBLEMS:
 
