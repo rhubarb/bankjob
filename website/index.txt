@@ -1,79 +1,96 @@
 h1. bankjob
 
+http://bankjob.rubyforge.org/
 
-h2. What
+Bankjob is a command line ruby program for scraping online banking sites and producing statements as local files in OFX ("Open Fincancial Exchange":http://www.ofx.net) or CSV (Comma Separated Values) formats.
 
+Bankjob was created for people like me who want to get their bank data into a 3rd party application but whose bank does not support downloads in OFX format.
+It's also useful for keeping a permanent store of bank statements on your computer for reading in Excel.
 
 h2. Installing
 
+Mac OSX / Linux:
 <pre syntax="ruby">sudo gem install bankjob</pre>
+
+Windows:
+<pre syntax="ruby">gem install bankjob</pre>
 
 h2. The basics
 
+* Scrapes an online banking website to produce a bank statement
+* Stores bank statements locally in CSV files, which can be loaded directly in spreadsheets like Microsoft Excel
+* Stores bank statements locally in OFX files, which can be imported by many programs such as Quicken, MS Money, Gnu Cash and uploaded to some web applications
+* Built-in support for uploading to your Wesabe account (www.wesabe.com)
+* Supports coding of simple rules in ruby for modifying transaction details. E.g. automatically change "pment inst 3245003" to "paid home loan interest"
 
-h2. Demonstration of usage
+h2. Usage
 
+<pre>
+bankjob --csv c:\bank\csv --scraper c:\bank\my_bpi_scraper.rb
+        --scraper-args "<my_username> <my_password>"
+        --wesabe "<wesabe_user> <wesabe_pass> <wesabe_acct>
+        --log c:\bank\bankjob.log --debug
+</pre>
 
+I have this command in a .bat file which is launched daily by a scheduled task on my windows Media Center PC (which, since it's always on and connected to the internet, makes a useful home server)
+
+This one command will:
+* scrape my online banking website after logging in as me and navigating to the page with recent transactions
+* apply some rules, coded in the <code>my_bpi_scraper.rb</code> file that make the descriptions more readable
+* produce a statement in comma-separated-value format, keeping the original raw data as well as the new descriptions,
+  storing that in a file with a name like <code>20090327-20090406.csv</code> in my local directory <code>c:\bank\csv</code> (serves as a sort of permanent 'audit' record)
+* produce an OFX document with the same statement information
+* upload the OFX statement to my wesabe account
+* log debug-level details in bankjob.log
 
 h2. Forum
 
-"http://groups.google.com/group/bankjob-ruby":http://groups.google.com/group/bankjob-ruby
+"http://groups.google.com/group/bankjob":http://groups.google.com/group/bankjob
+
+h2. Creating your own Scraper
+
+Unfortunately Bankjob isn't much good to you in its natural state unless you happen to bank with the same bank as me.
+To make it useful you need a scraper for your own online bank site. How hard that will be depends on how handy you are with "Ruby":http://www.ruby-lang.org programming and with using "Hpricot":http://wiki.github.com/why/hpricot/an-hpricot-showcase and "Mechanize":http://mechanize.rubyforge.org/mechanize
+
+You'll get some help from:
+* "The Mechanize docs":http://mechanize.rubyforge.org/mechanize
+* "The Hpricot wiki":http://wiki.github.com/why/hpricot/an-hpricot-showcase
+* The #BpiScraper# is included in the scrapers directory and is well documented as an example.
+* The #BaseScraper# is the superclass of #BpiScraper#. Using it as a base class for your own scraper is optional, but it saves you a little work by starting up Mechanize for you.
+* The Scraper class itself, which you _must_ subclass with your own Scraper, has more to say on creating your own scraper in its "rubydocs":http://bankjob.rubyforge.org/classes/lib/bankjob/Scraper
+* Look for help on the "forum":http://groups.google.com/group/bankjob
+* Ask me directly "rhubarb":mailto:rhubarb.bankjob@gmail.com
+
+<em>Warning: Don't upload or email anyone (including me) your private online banking information. If you create your own scraper, please share it, but remove any account details from it first.</em>
+
+If and when you do develop a scraper for your banksite, send it to me (without any passwords or private banking info of course!) and I'll add it to the built-in scrapers.
 
 h2. How to submit patches
 
-Read the "8 steps for fixing other people's code":http://drnicwilliams.com/2007/06/01/8-steps-for-fixing-other-peoples-code/ and for section "8b: Submit patch to Google Groups":http://drnicwilliams.com/2007/06/01/8-steps-for-fixing-other-peoples-code/#8b-google-groups, use the Google Group above.
+You can fetch the source from github at:
 
-TODO - pick SVN or Git instructions
+"http://github.com/rhubarb/bankjob/tree/master":http://github.com/rhubarb/bankjob/tree/master
 
-The trunk repository is <code>svn://rubyforge.org/var/svn/bankjob/trunk</code> for anonymous access.
+using:
+<pre>git clone git://github.com/rhubarb/bankjob.git</pre>
 
-OOOORRRR
-
-You can fetch the source from either:
-
-<% if rubyforge_project_id %>
-
-* rubyforge: "http://rubyforge.org/scm/?group_id=<%= rubyforge_project_id %>":http://rubyforge.org/scm/?group_id=<%= rubyforge_project_id %>
-
-<pre>git clone git://rubyforge.org/bankjob.git</pre>
-
-<% else %>
-
-* rubyforge: MISSING IN ACTION
-
-TODO - You can not created a RubyForge project, OR have not run <code>rubyforge config</code>
-yet to refresh your local rubyforge data with this projects' id information.
-
-When you do this, this message will magically disappear!
-
-Or you can hack website/index.txt and make it all go away!!
-
-<% end %>
-
-* github: "http://github.com/GITHUB_USERNAME/bankjob/tree/master":http://github.com/GITHUB_USERNAME/bankjob/tree/master
-
-<pre>git clone git://github.com/GITHUB_USERNAME/bankjob.git</pre>
-
-
-TODO - add "github_username: username" to ~/.rubyforge/user-config.yml and newgem will reuse it for future projects.
-
-
-* gitorious: "git://gitorious.org/bankjob/mainline.git":git://gitorious.org/bankjob/mainline.git
-
-<pre>git clone git://gitorious.org/bankjob/mainline.git</pre>
-
-h3. Build and test instructions
-
-<pre>cd bankjob
-rake test
-rake install_gem</pre>
-
+and submit any patches to the "forum":http://groups.google.com/group/bankjob.
 
 h2. License
 
 This code is free to use under the terms of the MIT license. 
 
+As far as rhubarb is concerned, this means you can:
+- Use it in your private projects
+- Use it in your public projects
+- Use it in your commercial projects and make big bucks
+- Mulch it up and use it in your garden as fertilizer
+- Generally go crazy with it
+
 h2. Contact
 
-Comments are welcome. Send an email to "rhubarb":mailto:rhubarb.bankjob@gmail.com via the "forum":http://groups.google.com/group/bankjob
+Comments are welcome as are feature requests and patches.
+
+Send an email to "rhubarb":mailto:rhubarb.bankjob@gmail.com
+Or check out the "forum":http://groups.google.com/group/bankjob
 

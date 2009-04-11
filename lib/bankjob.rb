@@ -8,5 +8,5 @@ require 'bankjob/scraper.rb'
 require 'bankjob/payee.rb'
 
 module Bankjob
-  BANKJOB_VERSION = '0.0.2' unless defined?(BANKJOB_VERSION)
+  BANKJOB_VERSION = '0.5.0' unless defined?(BANKJOB_VERSION)
 end
