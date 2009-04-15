@@ -136,7 +136,7 @@ module Bankjob
   #        transaction = create_transaction
   #        transaction.date = #... scrape a date here
   #        ...
-  #        statement.transactions <<
+  #        statement.transactions << transaction
   #      end
   #    end
   #  end

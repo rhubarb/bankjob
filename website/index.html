@@ -37,8 +37,7 @@
         <a href="http://rubyforge.org/projects/bankjob" class="numbers">0.5.0</a>
       </div>
     </div>
-    <p>http://bankjob.rubyforge.org/</p>
-<p>Bankjob is a command line ruby program for scraping online banking sites and producing statements as local files in <span class="caps">OFX</span> (<a href="http://www.ofx.net">Open Fincancial Exchange</a>) or <span class="caps">CSV</span> (Comma Separated Values) formats.</p>
+    <p>Bankjob is a command line ruby program for scraping online banking sites and producing statements as local files in <span class="caps">OFX</span> (<a href="http://www.ofx.net">Open Fincancial Exchange</a>) or <span class="caps">CSV</span> (Comma Separated Values) formats.</p>
 <p>Bankjob was created for people like me who want to get their bank data into a 3rd party application but whose bank does not support downloads in <span class="caps">OFX</span> format.<br />
 It&#8217;s also useful for keeping a permanent store of bank statements on your computer for reading in Excel.</p>
 <h2>Installing</h2>
@@ -72,6 +71,48 @@ bankjob --csv c:\bank\csv --scraper c:\bank\my_bpi_scraper.rb
 	<li>upload the <span class="caps">OFX</span> statement to my wesabe account</li>
 	<li>log debug-level details in bankjob.log</li>
 </ul>
+<p>Use <code>bankjob -h</code> to see all of the options.</p>
+<h2>Wesabe</h2>
+<p>Wesabe (<a href="www.wesabe.com">www.wesabe.com</a>) is a sort of free web.2.0-money-manager-financial-social-networking application that I&#8217;m using to track my bank acounts.<br />
+I like it better than my bank&#8217;s online banking apps because it:</p>
+<ul>
+	<li>shows me all my accounts at once</li>
+	<li>lets me track certain kinds of spending, with automatically applied tags and nice graphs</li>
+	<li>has an iphone-web-app (and a non-iphone one too)</li>
+	<li>even has a nifty dashboard widget for Mac OS X.</li>
+	<li>does much more than this but you should go to their site to find out more.</li>
+</ul>
+<p>At this point I should point out that Bankjob and its developers (okay develop<em>er</em> &#8211; there&#8217;s just me, I admit it. God it&#8217;s lonely here) have no affiliation with Wesabe whatsoever. I just happen to use Wesabe and like what it has to offer.<br />
+In fact I just happened to <em>want</em> to use Wesabe, but couldn&#8217;t because my bank doesn&#8217;t offer <span class="caps">OFX</span> downloads and is not supported by the automatic updater. Hence I developed Bankjob to allow me to use Wesabe.</p>
+<p>I think there are a lot of other non-US would-be Wesabe users out there in the same boat: Wesabe and its brethren do not support our banks, and our banks don&#8217;t make it any easier by supporting <span class="caps">OFX</span> downloads.</p>
+<p>There are similar services out there like Mint, Quicken Online, Yodlee and others (see one comparison <a href="http://digg.com/business_finance/Late_2008_comparison_of_Wesabe_Mint_and_Quicken_Online">here</a>), or just google them.<br />
+The problem with most of these is that they offer even less support than Wesabe for banks outside of the US. Wesabe supports some non-US banks, but more importantly offers a public <span class="caps">API</span> which allows apps like Bankjob to upload accounts &#8211; among other things. (Actually I think Yodlee might have more support for non-US banks but still no public <span class="caps">API</span> &#8211; if your Bank is not officially supported you&#8217;re out of luck)</p>
+<p>To use the Wesabe upload feature of Bankjob you need a Wesabe username and password. If you have more than one account with Wesabe you need to know the ID that Wesabe gives the account. This is easy to find out: if you have one a account it&#8217;s &#8220;1&#8221; and you don&#8217;t need to specify it. If you have more than one account, Bankjob will help you out. Use:<br />
+<code>bankjob --wesabe-help</code><br />
+to see the general help information, but to test your Wesabe account, use<br />
+<code>bankjob --wesabe-help "&lt;wesabe-user-name&gt; &lt;wesabe-password&gt;"</code><br />
+(you&#8217;ll need to use the quotes, with a space between the username and password)</p>
+<p>With this command bankjob will list out all of your Wesabe accounts and tell you how to upload to them.</p>
+<p>I have only one account at the moment, and here&#8217;s what happens when I use <code>--wesabe-help</code> (the text in angle brackets is added by me to protect my account, but otherwise this is real input/output)</p>
+<pre>
+[me:~] bankjob --wesabe-help "&lt;my-wesabe-user&gt; &lt;my-wesabe-password&gt;"
+Connecting to Wesabe...
+You have 1 Wesabe accounts:
+ Account Name: &lt;The name of my bank account in wesabe&gt;
+    wesabe id: 1
+   account no: 0001
+         type: Checking
+      balance: 2196.12
+         bank: &lt;The name of my bank&gt;
+To upload to this account use:
+  bankjob [other bankjob args] --wesabe "&lt;my-wesabe-user&gt; &lt;my-wesabe-password&gt; 1"
+
+Since you have one account you do not need to specify the id number, use:
+  bankjob [other bankjob args] --wesabe "&lt;my-wesabe-user&gt; &lt;my-wesabe-password&gt;"
+</pre>
+<p>Again, if in any doubt <code>bankjob --wesabe-help</code> should set you straight.</p>
+<h2>Rubydoc</h2>
+<p><a href="http://bankjob.rubyforge.org/rdoc">http://bankjob.rubyforge.org/rdoc</a></p>
 <h2>Forum</h2>
 <p><a href="http://groups.google.com/group/bankjob">http://groups.google.com/group/bankjob</a></p>
 <h2>Creating your own Scraper</h2>
@@ -81,9 +122,9 @@ To make it useful you need a scraper for your own online bank site. How hard tha
 <ul>
 	<li><a href="http://mechanize.rubyforge.org/mechanize">The Mechanize docs</a></li>
 	<li><a href="http://wiki.github.com/why/hpricot/an-hpricot-showcase">The Hpricot wiki</a></li>
-	<li>The #BpiScraper# is included in the scrapers directory and is well documented as an example.</li>
-	<li>The #BaseScraper# is the superclass of #BpiScraper#. Using it as a base class for your own scraper is optional, but it saves you a little work by starting up Mechanize for you.</li>
-	<li>The Scraper class itself, which you <em>must</em> subclass with your own Scraper, has more to say on creating your own scraper in its <a href="http://bankjob.rubyforge.org/classes/lib/bankjob/Scraper">rubydocs</a></li>
+	<li>The <code>BpiScraper</code> is included in the scrapers directory and is well documented as an example.</li>
+	<li>The <code>BaseScraper</code> is the superclass of <code>BpiScraper</code>. Using it as a base class for your own scraper is optional, but it saves you a little work by starting up Mechanize for you.</li>
+	<li>The Scraper class itself, which you <em>must</em> subclass with your own Scraper, has more to say on creating your own scraper in its <a href="http://bankjob.rubyforge.org/rdoc/classes/Bankjob/Scraper.html">rubydoc</a></li>
 	<li>Look for help on the <a href="http://groups.google.com/group/bankjob">forum</a></li>
 	<li>Ask me directly <a href="mailto:rhubarb.bankjob@gmail.com">rhubarb</a></li>
 </ul>
@@ -108,7 +149,7 @@ To make it useful you need a scraper for your own online bank site. How hard tha
 <p>Send an email to <a href="mailto:rhubarb.bankjob@gmail.com">rhubarb</a><br />
 Or check out the <a href="http://groups.google.com/group/bankjob">forum</a></p>
     <p class="coda">
-      <a href="rhubarb.bankjob@gmail.com">Rhubarb</a>, 11th April 2009<br>
+      <a href="rhubarb.bankjob@gmail.com">Rhubarb</a>, 14th April 2009<br>
       Theme extended from <a href="http://rb2js.rubyforge.org/">Paul Battley</a>
     </p>
 </div>

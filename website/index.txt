@@ -1,7 +1,5 @@
 h1. bankjob
 
-http://bankjob.rubyforge.org/
-
 Bankjob is a command line ruby program for scraping online banking sites and producing statements as local files in OFX ("Open Fincancial Exchange":http://www.ofx.net) or CSV (Comma Separated Values) formats.
 
 Bankjob was created for people like me who want to get their bank data into a 3rd party application but whose bank does not support downloads in OFX format.
@@ -43,6 +41,68 @@ This one command will:
 * upload the OFX statement to my wesabe account
 * log debug-level details in bankjob.log
 
+Use <code>bankjob -h</code> to see all of the options.
+
+h2. Wesabe
+
+Wesabe ("www.wesabe.com":www.wesabe.com) is a sort of free web.2.0-money-manager-financial-social-networking application that I'm using to track my bank acounts.
+I like it better than my bank's online banking apps because it:
+* shows me all my accounts at once
+* lets me track certain kinds of spending, with automatically applied tags and nice graphs
+* has an iphone-web-app (and a non-iphone one too)
+* even has a nifty dashboard widget for Mac OS X.
+* does much more than this but you should go to their site to find out more.
+
+At this point I should point out that Bankjob and its developers (okay develop<em>er</em> - there's just me, I admit it. God it's lonely here) have no affiliation with Wesabe whatsoever. I just happen to use Wesabe and like what it has to offer.
+In fact I just happened to _want_ to use Wesabe, but couldn't because my bank doesn't offer OFX downloads and is not supported by the automatic updater. Hence I developed Bankjob to allow me to use Wesabe.
+
+I think there are a lot of other non-US would-be Wesabe users out there in the same boat: Wesabe and its brethren do not support our banks, and our banks don't make it any easier by supporting OFX downloads.
+
+There are similar services out there like Mint, Quicken Online, Yodlee and others (see one comparison "here":http://digg.com/business_finance/Late_2008_comparison_of_Wesabe_Mint_and_Quicken_Online), or just google them.
+The problem with most of these is that they offer even less support than Wesabe for banks outside of the US. Wesabe supports some non-US banks, but more importantly offers a public API which allows apps like Bankjob to upload accounts - among other things. (Actually I think Yodlee might have more support for non-US banks but still no public API - if your Bank is not officially supported you're out of luck)
+
+To use the Wesabe upload feature of Bankjob you need a Wesabe username and password. If you have more than one account with Wesabe you need to know the ID that Wesabe gives the account. This is easy to find out: if you have one a account it's "1" and you don't need to specify it. If you have more than one account, Bankjob will help you out. Use:
+<code>bankjob --wesabe-help</code>
+to see the general help information, but to test your Wesabe account, use
+<code>bankjob --wesabe-help "<wesabe-user-name> <wesabe-password>"</code>
+(you'll need to use the quotes, with a space between the username and password)
+
+With this command bankjob will list out all of your Wesabe accounts and tell you how to upload to them.
+
+I have only one account at the moment, and here's what happens when I use <code>--wesabe-help</code> (the text in angle brackets is added by me to protect my account, but otherwise this is real input/output)
+
+<pre>
+[me:~] bankjob --wesabe-help "<my-wesabe-user> <my-wesabe-password>"
+Connecting to Wesabe...
+You have 1 Wesabe accounts:
+ Account Name: <The name of my bank account in wesabe>
+    wesabe id: 1
+   account no: 0001
+         type: Checking
+      balance: 2196.12
+         bank: <The name of my bank>
+To upload to this account use:
+  bankjob [other bankjob args] --wesabe "<my-wesabe-user> <my-wesabe-password> 1"
+
+Since you have one account you do not need to specify the id number, use:
+  bankjob [other bankjob args] --wesabe "<my-wesabe-user> <my-wesabe-password>"
+</pre>
+
+Again, if in any doubt <code>bankjob --wesabe-help</code> should set you straight.
+
+h2. CSV
+
+CSV is one of techy-sounding terms that seems ridiculously simple when expanded: Comma, Separated, Values.
+They are just what they sound like: Values. Separated. By, yes, that's right, Commas.
+CSV sounds like an obvious idea but is actually quite powerful. You can think of CSV being to Microsoft Excel as Plain Text (.txt) is to Microsoft Word: A CSV file contains pure data that you can load into Excel as rows and columns.
+
+One of the other motiviations for writing Bankjob was to have a continuous
+
+
+h2. Rubydoc
+
+"http://bankjob.rubyforge.org/rdoc":http://bankjob.rubyforge.org/rdoc
+
 h2. Forum
 
 "http://groups.google.com/group/bankjob":http://groups.google.com/group/bankjob
@@ -55,9 +115,9 @@ To make it useful you need a scraper for your own online bank site. How hard tha
 You'll get some help from:
 * "The Mechanize docs":http://mechanize.rubyforge.org/mechanize
 * "The Hpricot wiki":http://wiki.github.com/why/hpricot/an-hpricot-showcase
-* The #BpiScraper# is included in the scrapers directory and is well documented as an example.
-* The #BaseScraper# is the superclass of #BpiScraper#. Using it as a base class for your own scraper is optional, but it saves you a little work by starting up Mechanize for you.
-* The Scraper class itself, which you _must_ subclass with your own Scraper, has more to say on creating your own scraper in its "rubydocs":http://bankjob.rubyforge.org/classes/lib/bankjob/Scraper
+* The <code>BpiScraper</code> is included in the scrapers directory and is well documented as an example.
+* The <code>BaseScraper</code> is the superclass of <code>BpiScraper</code>. Using it as a base class for your own scraper is optional, but it saves you a little work by starting up Mechanize for you.
+* The Scraper class itself, which you _must_ subclass with your own Scraper, has more to say on creating your own scraper in its "rubydoc":http://bankjob.rubyforge.org/rdoc/classes/Bankjob/Scraper.html
 * Look for help on the "forum":http://groups.google.com/group/bankjob
 * Ask me directly "rhubarb":mailto:rhubarb.bankjob@gmail.com
 
