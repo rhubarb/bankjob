@@ -90,13 +90,6 @@ Since you have one account you do not need to specify the id number, use:
 
 Again, if in any doubt <code>bankjob --wesabe-help</code> should set you straight.
 
-h2. CSV
-
-CSV is one of techy-sounding terms that seems ridiculously simple when expanded: Comma, Separated, Values.
-They are just what they sound like: Values. Separated. By, yes, that's right, Commas.
-CSV sounds like an obvious idea but is actually quite powerful. You can think of CSV being to Microsoft Excel as Plain Text (.txt) is to Microsoft Word: A CSV file contains pure data that you can load into Excel as rows and columns.
-
-One of the other motiviations for writing Bankjob was to have a continuous
 
 
 h2. Rubydoc

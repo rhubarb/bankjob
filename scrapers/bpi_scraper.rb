@@ -15,7 +15,10 @@ include Bankjob        # access the namespace of Bankjob
 # as an example of how to build your own scraper.
 #
 # BpiScraper expects the user name and password to be passed on the command line
-# using -scraper_args "user password" (with a space between them).
+# using --scraper-args "user password" (with a space between them).
+# Optionally, the account number can also be specified with the 3rd argument so:
+# --scraper-args "user password 803030000001" causing that account to be selected
+# before scraping the statement
 #
 class BpiScraper < BaseScraper
 
@@ -75,6 +78,18 @@ class BpiScraper < BaseScraper
     if (transactions_page.nil?)
       raise "BPI Scraper failed to load the transactions page at #{TRANSACTIONS_URL}"
     end
+
+    # If there is a third scraper arg, it is the account number and we use it
+    # to select the account on the transactions page
+    if (scraper_args and scraper_args.length > 2)
+      account = scraper_args[2]
+      # the account selector is the field 'contaCorrente' in the form 'form_mov'
+      Bankjob.select_and_submit(transactions_page, 'form_mov', 'contaCorrente', account)
+      sleep 1
+      # refetch the transactions page after selecting the account
+      transactions_page = agent.get(TRANSACTIONS_URL)
+    end
+
     return transactions_page
   end
 

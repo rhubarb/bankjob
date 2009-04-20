@@ -79,7 +79,54 @@ module Bankjob
     return amt.to_f
   end
 
+  ##
+  # Finds a selector field in a named +form+ in the given Mechanize +page+, selects
+  # the suggested +label+
+  def select_and_submit(page, form_name, select_name, selection)
+    option = nil
+    form  = page.form(form_name)
+    unless form.nil?
+      selector = form.field(select_name)
+      unless selector.nil?
+        option = select_option(selector, selection)
+        form.submit
+      end
+    end
+    return option
+  end
 
+  ##
+  # Given a Mechanize::Form:SelectList +selector+ will attempt to select the option
+  # specified by +selection+.
+  # This algorithm is used:
+  #   The first option with a label equal to the +selection+ is selected.
+  #    - if none is found then -
+  #   The first option with a value equal to the +selection+ is selected.
+  #    - if none is found then -
+  #   The first option with a label or value that equal to the +selection+ is selected
+  #   after removing non-alphanumeric characters from the label or value
+  #    - if none is found then -
+  #   The first option with a lable or value that _contains_ the +selection+
+  #
+  # If matching option is found, the #select is called on it.
+  # If no option is found, nil is returned - otherwise the option is returned
+  #
+  def select_option(selector, selection)
+    options = selector.options.select { |o| o.text == selection }
+    options = selector.options.select { |o| o.value == selection } if options.empty?
+    options = selector.options.select { |o| o.text.gsub(/[^a-zA-Z0-9]/,"") == selection } if options.empty?
+    options = selector.options.select { |o| o.value.gsub(/[^a-zA-Z0-9]/,"") == selection } if options.empty?
+    options = selector.options.select { |o| o.text.include?(selection) } if options.empty?
+    options = selector.options.select { |o| o.value.include?(selection) } if options.empty?
+
+    option = options.first
+    option.select() unless option.nil?
+    return option
+  end
+
+  ##
+  # Uploads the given OFX document to the Wesabe account specified in the +wesabe_args+
+  #
   def self.wesabe_upload(wesabe_args, ofx_doc, logger)
     if (wesabe_args.nil? or (wesabe_args.length < 2 and wesabe_args.length > 3))
       raise "Incorrect number of args for Wesabe (#{wesabe_args}), should be 2 or 3."
@@ -113,6 +160,13 @@ module Bankjob
     end
   end
 
+  ##
+  # Helps the user determine how to upload to their Wesabe account.
+  # 
+  # When used with no args, will give generic help information.
+  # When used with Wesabe account and password, will log into Wesabe and list
+  # the users accounts, and suggest command line args to upload to each account.
+  #
   def self.wesabe_help(wesabe_args)
     if (wesabe_args.nil? or wesabe_args.length != 2)
       puts <<-EOF

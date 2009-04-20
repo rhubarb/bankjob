@@ -1,4 +1,7 @@
-== 0.0.1 2009-02-13
+== 0.5.1 2009-04-20
+* 1 minor enhancement:
+  * bpi_scraper.rb now accepts an optional third argument for the account number. Entering a number will cause the scraper to scrape that account rather than the default account.
 
+== 0.5.0 2009-04-14
 * 1 major enhancement:
   * Initial release
