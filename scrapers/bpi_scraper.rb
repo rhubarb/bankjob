@@ -112,12 +112,16 @@ class BpiScraper < BaseScraper
       #    <td valign="middle" width="135" ALIGN="left" class="TextoAzulBold">Saldo Disponível:</td>
       #    <td valign="middle" width="110" ALIGN="right">1.751,31&nbsp;EUR</td>
       # to 1751,31
-      available_cell = (transactions_page/"td").select { |ele| ele.inner_text =~ /^Saldo Dispon/ }.first.next_sibling
-      statement.closing_available = available_cell.inner_text.scan(/[\d.,]+/)[0].gsub(/\./,"")
-      account_balance_cell = (transactions_page/"td").select { |ele| ele.inner_text =~ /^Saldo Contab/ }.first.next_sibling
-      statement.closing_balance = account_balance_cell.inner_text.scan(/[\d.,]+/)[0].gsub(/\./,"")
+      # Commenting out balances for now to let the balance be taken from the 
+      # top-most transaction - this keeps balances in synch with actual transactions
+      # and allows for statements created for past dates (the balance at the top of the
+      # page is always the current one, not the one for the last transaction on that page)
+      #available_cell = (transactions_page/"td").select { |ele| ele.inner_text =~ /^Saldo Dispon/ }.first.next_sibling
+      #statement.closing_available = available_cell.inner_text.scan(/[\d.,]+/)[0].gsub(/\./,"")
+      #account_balance_cell = (transactions_page/"td").select { |ele| ele.inner_text =~ /^Saldo Contab/ }.first.next_sibling
+      #statement.closing_balance = account_balance_cell.inner_text.scan(/[\d.,]+/)[0].gsub(/\./,"")
 
-      transactions = []
+      #transactions = []
 
       # find the first header with the CSS class "Laranja" as this will be the first
       # header in the transactions table
@@ -156,7 +160,7 @@ class BpiScraper < BaseScraper
         transaction.new_balance=data[4]
 
         # add thew new transaction to the array
-        transactions << transaction
+        statement.add_transaction(transaction)
         #	break if $debug
       end
     rescue => exception
@@ -170,8 +174,11 @@ class BpiScraper < BaseScraper
       abort(msg)
     end
 
-    # set the transactions on the statement
-    statement.transactions = transactions
+    # finish the statement to set the balances and dates
+    # and to fake the times since the bpi web pages
+    # don't hold the transaction times
+    statement.finish(true, true) # most_recent_first, fake_times
+
     return statement
   end
 
@@ -179,7 +186,7 @@ class BpiScraper < BaseScraper
     # make sure the page is a mechanize page, not hpricot
     if transactions_page.kind_of?(Hpricot::Doc) then 
       page = WWW::Mechanize::Page.new(nil, {'content-type'=>'text/html'},
-                                      transactions_page.html, nil, nil)
+        transactions_page.html, nil, nil)
     else
       page = transactions_page
     end

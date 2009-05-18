@@ -67,6 +67,14 @@ module Bankjob
     # Use a constant to set this - defaults to CHECKING
     attr_accessor :account_type
 
+    # the last date of the period the statement covers
+    # Translates to the OFX element DTEND
+    attr_accessor :to_date
+
+    # the first date of the period the statement covers
+    # Translates to the OFX element DTSTART
+    attr_accessor :from_date
+
     ##
     # Creates a new empty Statement with no transactions.
     # The +account_number+ must be specified as a 1-22 character string.
@@ -77,6 +85,8 @@ module Bankjob
       @currency = currency
       @transactions = []
       @account_type = CHECKING
+      @closing_balance = nil
+      @closing_available = nil
     end
     
     ##
@@ -146,45 +156,6 @@ module Bankjob
       @closing_balance = nil
       @closing_available = nil
       @transactions = merge_transactions(other)
-    end
-
-    ##
-    # Returns the statement's start date.
-    # The +from_date+ is taken from the date of the last transaction in the statement
-    #
-    def from_date()
-      return nil if @transactions.empty?
-      @transactions.last.date
-    end
-
-    ##
-    # Returns the statement's end date.
-    # The +to_date+ is taken from the date of the first transaction in the statement
-    #
-    def to_date()
-      return nil if @transactions.empty?
-      @transactions.first.date
-    end
-
-    ##
-    # Returns the closing balance by looking at the
-    # new balance of the first transaction.
-    # If there are no transactions, +nil+ is returned.
-    #
-    def closing_balance()
-      return nil if @closing_balance.nil? and @transactions.empty?
-      @closing_balance ||= @transactions.first.new_balance
-    end
-
-    ##
-    # Returns the closing available balance by looking at the
-    # new balance of the first transaction.
-    # If there are no transactions, +nil+ is returned.
-    # Note that this is the same value returned as +closing_balance+.
-    #
-    def closing_available()
-      return nil if @closing_available.nil? and @transactions.empty?
-      @closing_available ||= @transactions.first.new_balance
     end
 
     ##
@@ -341,6 +312,112 @@ module Bankjob
         }
       }
       return buf
+    end
+    
+    ONE_MINUTE = 60
+    ELEVEN_59_PM = 23 * 60 * 60 + 59 * 60  # seconds at 23:59
+    MIDDAY = 12 * 60 * 60
+
+    ##
+    # Finishes the statement after scraping in two ways depending on the information
+    # that the scraper was able to obtain. Optionally have your scraper class call
+    # this after scraping is finished.
+    #
+    # This method:
+    # 
+    # 1. Sets the closing balance and available_balance and the to_ and from_dates
+    #    by using the first and last transactions in the list. Which transaction is
+    #    used depends on whether +most_recent_first+ is true or false.
+    #    The scraper may just set these directly in which case this may not be necessary.
+    #
+    # 2. If +fake_times+ is true time-stamps are invented and added to the transaction
+    #    date attributes. This is useful if the website beings scraped shows dates, but
+    #    not times, but has transactions listed in chronoligical arder. 
+    #    Without this process, the ofx generated has no proper no indication of the order of
+    #    transactions that occurred in the same day other than the order in the statement
+    #    and this may be ignored by the client. (Specifically, Wesabe will reorder transactions
+    #    in the same day if they all appear to occur at the same time).
+    #    
+    #    Note that the algorithm to set the fake times is a little tricky. Assuming
+    #    the transactionsa are most-recent-first, the first last transaction on each 
+    #    day is set at 11:59pm each transaction prior to that is one minute earlier.
+    #    
+    #    But for the first transactions in the statement, the first is set at a few
+    #    minutes after midnight, then we count backward. (The actual number of minutes
+    #    is based on the number of transactions + 1 to be sure it doesnt pass midnight)
+    #    
+    #    This is crucial because transactions for a given day will often span 2 or more
+    #    statement. By starting just after midnight and going back to just before midnight
+    #    we reduce the chance of overlap.
+    #
+    #    If the to-date is the same as the from-date for a transaction, then we start at
+    #    midday, so that prior and subsequent statements don't overlap.
+    #
+    #   This simple algorithm basically guarantees no overlaps so long as:
+    #   i.  The number of transactions is small compared to the number of minutes in a day
+    #   ii. A single day will not span more than 3 statements
+    #
+    #   If the statement is most-recent-last (+most_recent_first = false+) the same
+    #   algorithm is applied, only in reverse
+    #
+    def finish(most_recent_first, fake_times=false)
+      if !@transactions.empty? then
+        # if the user hasn't set the balances, set them to the first or last
+        # transaction balance depending on the order
+        if most_recent_first then
+          @closing_balance ||= transactions.first.new_balance
+          @closing_available ||= transactions.first.new_balance
+          @to_date ||= transactions.first.date
+          @from_date ||= transactions.last.date
+        else
+          @closing_balance ||= transactions.last.new_balance
+          @closing_available ||= transactions.last.new_balance
+          @to_date ||= transactions.last.date
+          @from_date ||= transactions.first.date
+        end
+
+        if fake_times and to_date.hour == 0 then
+          # the statement was unable to scrape times to go with the dates, but the
+          # client (say wesabe) will get the transaction order wrong if there are no
+          # times, so here we add times that order the transactions according to the
+          # order of the array of transactions
+
+          # the delta is 1 minute forward or backward fr
+          if to_date == from_date then
+            # all of the statement's transactions occur in the same day - to try to
+            # avoid overlap with subsequent or previous transacitons we group order them
+            # from 11am onward
+            seconds = MIDDAY
+          else
+            seconds = (transactions.length + 1) * 60
+          end
+
+          if most_recent_first then
+            yday = transactions.first.date.yday
+            start = 0
+            delta = 1
+            finish = transactions.length
+          else
+            yday = transactions.last.date.yday
+            start = transactions.length - 1
+            finish = -1
+            delta = -1
+          end
+
+          i = start
+          until i == finish
+            tx = transactions[i]
+            if tx.date.yday != yday
+              # starting a new day, begin the countdown from 23:59 again
+              yday = tx.date.yday
+              seconds = ELEVEN_59_PM
+            end
+            tx.date += seconds unless tx.date.hour > 0
+            seconds -= ONE_MINUTE
+            i += delta
+          end
+        end
+      end
     end
 
     def to_s
