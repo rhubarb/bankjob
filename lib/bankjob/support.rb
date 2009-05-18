@@ -6,7 +6,7 @@ module Bankjob
 
   ##
   # Takes a date-time as a string or as a Time or DateTime object and returns
-  # it as either a Time or a DateTime object.
+  # it as either a Time object.
   #
   # This is useful in the setter method of a date attribute allowing the date
   # to be set as any type but stored internally as an object compatible with
@@ -14,8 +14,8 @@ module Bankjob
   # (Bankjob::Transaction uses this internally in the setter for +date+ for example
   #
   def self.create_date_time(date_time_raw)
-    if (date_time_raw.respond_to?(:rfc822)) then
-      # It's already a Time or DateTime
+    if (date_time_raw.is_a?(Time)) then
+      # It's already a Time 
       return date_time_raw
     elsif (date_time_raw.to_s.strip.empty?)
       # Nil or non dates are returned as nil
