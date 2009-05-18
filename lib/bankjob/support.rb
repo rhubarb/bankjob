@@ -167,7 +167,7 @@ module Bankjob
   # When used with Wesabe account and password, will log into Wesabe and list
   # the users accounts, and suggest command line args to upload to each account.
   #
-  def self.wesabe_help(wesabe_args)
+  def self.wesabe_help(wesabe_args, logger)
     if (wesabe_args.nil? or wesabe_args.length != 2)
       puts <<-EOF
 Wesabe (http://www.wesabe.com) is an online bank account management tool (like Mint)
@@ -240,12 +240,15 @@ Troubleshooting:
           end
         end
       rescue Exception => e
-        raise <<-EOF
+        msg =<<-EOF
 Failed to get Wesabe account information due to: #{e.message}.
 Check your username and password or use:
   bankjob --wesabe-help
 with no arguments for more details.
         EOF
+	logger.debug(msg)
+	logger.debug(e)
+	raise msg
       end
     end
   end # wesabe_help

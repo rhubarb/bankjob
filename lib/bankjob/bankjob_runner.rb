@@ -12,7 +12,7 @@ module Bankjob
       logger = options.logger
 
       if options.wesabe_help
-        Bankjob.wesabe_help(options.wesabe_args)
+        Bankjob.wesabe_help(options.wesabe_args, logger)
         exit(0) # Wesabe help describes to the user how to use the wesabe options then quits
       end
 
