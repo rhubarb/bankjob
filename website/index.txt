@@ -26,7 +26,7 @@ h2. Usage
 <pre>
 bankjob --csv c:\bank\csv --scraper c:\bank\my_bpi_scraper.rb
         --scraper-args "<my_username> <my_password>"
-        --wesabe "<wesabe_user> <wesabe_pass> <wesabe_acct>
+        --wesabe "<wesabe_user> <wesabe_pass> <wesabe_acct>"
         --log c:\bank\bankjob.log --debug
 </pre>
 

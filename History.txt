@@ -1,4 +1,11 @@
-== 0.5.1 2009-04-20
+== 0.5.2 2009-05-18
+* 3 minor enhancements:
+  * Added the ability to set fake timestamps on transactions so that transactions that have 00:00 for their time stamp that occur on the same day will be in the correct order in Wesabe
+    To use this in your scraper, call statement#finish(true, true)
+  * bpi_scraper.rb now sets the account number on the statement after scraping it. It turns out this is important for uploading multiple accounts to Wesabe - the accounts get mixed if the account numbers are wrong
+  * the Statement#finish method also updates the balance and start and end dates of the statement after the last transaction is scraped. This used to be done automatically in the attribute getters but did not support statements with most-recent transaction last (only first).
+
+=== 0.5.1 2009-04-20
 * 1 minor enhancement:
   * bpi_scraper.rb now accepts an optional third argument for the account number. Entering a number will cause the scraper to scrape that account rather than the default account.
 
