@@ -69,6 +69,13 @@ module Bankjob
   #                      organized Transaction objects with clearer descriptions of the 
   #                      transaction, etc.
   #
+  # +finish+ :: finishes a transaction by setting the balances and to and from dates
+  #             based on the first and last transactions. Also, optionally, generates
+  #             fake timestamps for transactions that have no time component in their
+  #             dates. This is important for clients that use the timestamps to order
+  #             the transactions correctly, and would otherwise mess up the order
+  #             if all transactions on the same day were at the same time (E.g. Wesabe)
+  #
   # Here is an example of a simple (but incomplete) scraper.
   # Note that all of the scraping and parsing is in the +scrape_statement+ method, although
   # a lot of the details of Hpricot parsing are left up to the imagination of the reader.
