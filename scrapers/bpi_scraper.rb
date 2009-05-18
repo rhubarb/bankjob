@@ -24,7 +24,7 @@ class BpiScraper < BaseScraper
 
   currency  "EUR" # Set the currency as euros
   decimal   ","    # BPI statements use commas as separators - this is used by the real_amount method
-  account_number "1234567" # override this with a real accoun number
+  account_number "1234567" # override this with a real account number
   account_type Statement::CHECKING # this is the default anyway
 
   # This rule detects ATM withdrawals and modifies
@@ -104,6 +104,9 @@ class BpiScraper < BaseScraper
     begin
       statement = create_statement
 
+      account_number = get_account_number(transactions_page)
+      statement.account_number = account_number unless account_number.nil?
+      
       # Find the closing balance avaliable and accountable
       # Get from this:
       #    <td valign="middle" width="135" ALIGN="left" class="TextoAzulBold">Saldo Disponível:</td>
@@ -170,6 +173,25 @@ class BpiScraper < BaseScraper
     # set the transactions on the statement
     statement.transactions = transactions
     return statement
+  end
+
+  def get_account_number(transactions_page)
+    # make sure the page is a mechanize page, not hpricot
+    if transactions_page.kind_of?(Hpricot::Doc) then 
+      page = WWW::Mechanize::Page.new(nil, {'content-type'=>'text/html'},
+                                      transactions_page.html, nil, nil)
+    else
+      page = transactions_page
+    end
+
+    # find the form for selecting an account  -it's called 'form_mov' 
+    form_mov  = page.form('form_mov')
+    # the field for selecting the current account is in this form
+    account_selector = form_mov.field('contaCorrente')
+    # the selected account value is the account number but it has "|NR|" on the end so strip
+    # everything that's not a number
+    account_number = account_selector.value.gsub(/[^0-9]/,"")
+    return account_number
   end
 
   ##
